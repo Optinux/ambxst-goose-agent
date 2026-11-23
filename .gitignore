@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets / local config - never commit
+.env
+.env.*
+*.key
+*.pem
+secrets.*
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+.qmlls.ini
+
+# Local scratch
+*.log
+/tmp/
+/ambxst/

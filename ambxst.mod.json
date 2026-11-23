@@ -1,0 +1,94 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Axenide/Ambxst/main/docs/mods/manifest.schema.json",
+  "manifestVersion": 1,
+  "id": "community.goose.agent",
+  "name": "Goose Agent Integration",
+  "version": "1.2.0",
+  "description": "Natively integrates the Goose autonomous agent into Ambxst's AI Sidebar with automatic Wayland window/folder context and live command progress.",
+  "license": "MIT",
+  "author": "Optinux",
+  "authorUrl": "https://github.com/Optinux",
+  "homepage": "https://github.com/Optinux/ambxst-goose-agent",
+  "changelog": "CHANGELOG.md",
+  "localization": {
+    "mode": "single",
+    "defaultLanguage": "en",
+    "languages": [
+      "en"
+    ]
+  },
+  "compatibility": {
+    "api": 1,
+    "ambxst": ">=1.4.1 <2.0.0",
+    "testedBaseCommits": [
+      "730f0f7bce1cc11740ac98ff3141f14bbc968fb2"
+    ]
+  },
+  "dependencies": [],
+  "dependencySources": {},
+  "conflicts": [],
+  "commands": [
+    "goose",
+    "axctl",
+    "python3"
+  ],
+  "permissions": [
+    "Reads open Wayland windows and active window metadata via axctl",
+    "Inspects active process working directories via /proc to resolve open folders",
+    "Spawns local goose CLI agent sessions with autonomous tool execution",
+    "Captures Wayland screenshots on demand via grim for Goose vision analysis"
+  ],
+  "settings": {
+    "schema": "settings.json"
+  },
+  "operations": [
+    {
+      "type": "overlay",
+      "source": "payload/assets/icons/goose.svg",
+      "target": "assets/icons/goose.svg"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/scripts/goose_context.py",
+      "target": "scripts/goose_context.py"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/modules/services/GooseContextService.qml",
+      "target": "modules/services/GooseContextService.qml"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/modules/services/GooseAgentService.qml",
+      "target": "modules/services/GooseAgentService.qml"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/modules/widgets/dashboard/assistant/GooseActivityView.qml",
+      "target": "modules/widgets/dashboard/assistant/GooseActivityView.qml"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/scripts/goose_screenshot.py",
+      "target": "scripts/goose_screenshot.py"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/scripts/goose_save_attachments.py",
+      "target": "scripts/goose_save_attachments.py"
+    },
+    {
+      "type": "overlay",
+      "source": "payload/scripts/goose_vision.py",
+      "target": "scripts/goose_vision.py"
+    },
+    {
+      "type": "patch",
+      "source": "patches/ai-service-goose.patch"
+    },
+    {
+      "type": "patch",
+      "source": "patches/assistant-sidebar-goose.patch"
+    }
+  ]
+}

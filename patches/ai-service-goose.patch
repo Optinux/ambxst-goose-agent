@@ -1,0 +1,152 @@
+diff --git a/modules/services/Ai.qml b/modules/services/Ai.qml
+index 6fe22f7..2e34383 100644
+--- a/modules/services/Ai.qml
++++ b/modules/services/Ai.qml
+@@ -19,6 +19,92 @@ Singleton {
+     property string tmpDir: "/tmp/ambxst-ai"
+ 
+     property list<AiModel> models: []
++    property AiModel _gooseModel: null
++    property int _gooseMessageIndex: -1
++
++    function _ensureGooseModel() {
++        if (!root._gooseModel) {
++            root._gooseModel = aiModelFactory.createObject(root, {
++                name: "Goose Agent",
++                model: "goose-agent",
++                provider: "goose",
++                endpoint: "local://goose",
++                icon: GooseAgentService.iconPath,
++                description: "Local autonomous Goose agent with desktop window & folder context",
++                requires_key: false
++            });
++        }
++        let exists = false;
++        for (let i = 0; i < models.length; i++) {
++            if (models[i] && models[i].model === "goose-agent") {
++                exists = true;
++                break;
++            }
++        }
++        if (!exists && root._gooseModel) {
++            let nextModels = [root._gooseModel];
++            for (let i = 0; i < models.length; i++) {
++                if (models[i]) nextModels.push(models[i]);
++            }
++            models = nextModels;
++        }
++        if (!currentModel && root._gooseModel) {
++            currentModel = root._gooseModel;
++        }
++    }
++
++    function _runGooseRequest() {
++        let promptText = "";
++        let promptAttachments = [];
++        for (let i = currentChat.length - 1; i >= 0; i--) {
++            if (currentChat[i].role === "user") {
++                promptText = currentChat[i].content || "";
++                if (Array.isArray(currentChat[i].attachments)) {
++                    promptAttachments = currentChat[i].attachments;
++                }
++                break;
++            }
++        }
++        let streamChat = Array.from(currentChat);
++        streamChat.push({
++            role: "assistant",
++            content: "",
++            model: currentModel ? currentModel.name : "Goose Agent"
++        });
++        root._gooseMessageIndex = streamChat.length - 1;
++        currentChat = streamChat;
++        GooseAgentService.sendPrompt(promptText, promptAttachments);
++    }
++
++    Connections {
++        target: GooseAgentService
++        Component.onCompleted: Qt.callLater(root._ensureGooseModel)
++        function onTextDelta(chunk) {
++            if (root._gooseMessageIndex < 0 || root._gooseMessageIndex >= currentChat.length)
++                return;
++            let updated = Array.from(currentChat);
++            let msg = Object.assign({}, updated[root._gooseMessageIndex]);
++            msg.content = (msg.content || "") + chunk;
++            updated[root._gooseMessageIndex] = msg;
++            currentChat = updated;
++        }
++        function onRunFinished(finalText, success, errorMessage) {
++            if (root._gooseMessageIndex >= 0 && root._gooseMessageIndex < currentChat.length) {
++                let updated = Array.from(currentChat);
++                let msg = Object.assign({}, updated[root._gooseMessageIndex]);
++                if (!success && errorMessage) {
++                    msg.content = (msg.content ? msg.content + "\n\n" : "") + "**Goose Error:** " + errorMessage;
++                } else if (!msg.content && finalText) {
++                    msg.content = finalText;
++                }
++                updated[root._gooseMessageIndex] = msg;
++                currentChat = updated;
++            }
++            root._gooseMessageIndex = -1;
++            isLoading = false;
++            saveCurrentChat();
++        }
++    }
+ 
+     property AiModel currentModel: models.length > 0 ? models[0] : null
+     property bool persistenceReady: false
+@@ -106,8 +192,14 @@ Singleton {
+     Connections {
+         target: GlobalStates
+         function onAssistantVisibleChanged() {
+-            if (GlobalStates.assistantVisible)
++            if (GlobalStates.assistantVisible) {
++                GooseContextService.captureSnapshot();
+                 root._ensureInit();
++                root._ensureGooseModel();
++                if (GooseAgentService.defaultToGooseOnOpen && root._gooseModel) {
++                    root.currentModel = root._gooseModel;
++                }
++            }
+         }
+     }
+ 
+@@ -361,6 +453,13 @@ Singleton {
+     }
+ 
+     function makeRequest() {
++        if (!currentModel) {
++            root._ensureGooseModel();
++        }
++        if (currentModel && currentModel.provider === "goose") {
++            root._runGooseRequest();
++            return;
++        }
+         let apiKey = getApiKey(currentModel);
+         if (!apiKey && currentModel.requires_key) {
+             lastError = I18n.t("ai.api_key_missing").replace("%1", currentModel.name).replace("%2", currentModel.key_id || I18n.t("ai.env_variable"));
+@@ -610,6 +709,8 @@ Singleton {
+     // ============================================
+ 
+     function createNewChat() {
++        GooseAgentService.resetSession();
++        root._gooseMessageIndex = -1;
+         currentChat = [];
+         currentChatId = Date.now().toString();
+         chatModelChanged();
+@@ -717,6 +818,7 @@ Singleton {
+     property int pendingFetches: 0
+ 
+     function fetchAvailableModels() {
++        Qt.callLater(root._ensureGooseModel);
+         fetchingModels = false; // Force refresh
+         if (fetchingModels)
+             return;
+@@ -1086,6 +1188,7 @@ Singleton {
+         }
+ 
+         models = updatedList;
++        root._ensureGooseModel();
+ 
+         if (!isRestored)
+             tryRestore();

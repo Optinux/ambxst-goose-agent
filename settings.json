@@ -1,0 +1,116 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Axenide/Ambxst/main/docs/mods/settings.schema.json",
+  "version": 1,
+  "fields": [
+    {
+      "key": "defaultToGooseOnOpen",
+      "label": "Default to Goose on SUPER+A",
+      "description": "Automatically select the Goose agent model whenever the AI Sidebar opens.",
+      "type": "boolean",
+      "default": true,
+      "restartRequired": false
+    },
+    {
+      "key": "contextPollIntervalSec",
+      "label": "Context Refresh Interval (seconds)",
+      "description": "How often open windows and active folder context refresh while the AI Sidebar is open.",
+      "type": "integer",
+      "default": 2,
+      "minimum": 1,
+      "maximum": 60,
+      "restartRequired": false
+    },
+    {
+      "key": "screenshotMode",
+      "label": "Screenshot Capture Area",
+      "description": "Default target when taking a screenshot for Goose vision analysis.",
+      "type": "enum",
+      "default": "monitor",
+      "options": [
+        { "label": "Focused Monitor", "value": "monitor" },
+        { "label": "Active Window", "value": "window" },
+        { "label": "All Monitors", "value": "all" }
+      ],
+      "restartRequired": false
+    },
+    {
+      "key": "autoScreenshotOnPrompt",
+      "label": "Auto-Attach Screenshot on Every Prompt",
+      "description": "Automatically capture and attach a screenshot whenever you send a message to Goose.",
+      "type": "boolean",
+      "default": false,
+      "restartRequired": false
+    },
+    {
+      "key": "visionModel",
+      "label": "Dedicated Vision Model (Optional)",
+      "description": "If set (e.g. gemma-4-26b-a4b-vision), screenshots/uploads are analyzed by this model first so text-only Goose models still get vision.",
+      "type": "string",
+      "default": "",
+      "restartRequired": false
+    },
+    {
+      "key": "visionApiBase",
+      "label": "Vision API Base URL",
+      "description": "OpenAI-compatible /v1 endpoint for the dedicated vision model (e.g. http://localhost:4000/v1 or http://<host>:4000/v1).",
+      "type": "string",
+      "default": "http://127.0.0.1:4000/v1",
+      "restartRequired": false
+    },
+    {
+      "key": "visionApiKey",
+      "label": "Vision API Key (Optional)",
+      "description": "Bearer token for your LiteLLM / vision endpoint (leave empty if using OPENAI_API_KEY).",
+      "type": "string",
+      "default": "",
+      "restartRequired": false
+    },
+    {
+      "key": "gooseMode",
+      "label": "Goose Execution Mode",
+      "description": "Controls GOOSE_MODE passed to the agent (auto executes tools immediately).",
+      "type": "enum",
+      "default": "auto",
+      "options": [
+        { "label": "Autonomous (auto)", "value": "auto" },
+        { "label": "Smart Approve (smart_approve)", "value": "smart_approve" },
+        { "label": "Chat Only (chat)" , "value": "chat" }
+      ],
+      "restartRequired": false
+    },
+    {
+      "key": "builtinExtensions",
+      "label": "Built-in Extensions",
+      "description": "Comma-separated Goose built-in extensions passed to --with-builtin.",
+      "type": "string",
+      "default": "developer",
+      "restartRequired": false
+    },
+    {
+      "key": "includeAllWindows",
+      "label": "Share All Open Windows",
+      "description": "Include every open window across workspaces, not just the focused window.",
+      "type": "boolean",
+      "default": true,
+      "restartRequired": false
+    },
+    {
+      "key": "maxTurns",
+      "label": "Max Agent Turns",
+      "description": "Safety limit for tool-call loops per prompt (--max-turns).",
+      "type": "integer",
+      "default": 25,
+      "minimum": 1,
+      "maximum": 100,
+      "restartRequired": false
+    },
+    {
+      "key": "gooseBinary",
+      "label": "Goose Binary Path",
+      "description": "Executable name or absolute path to the goose CLI.",
+      "type": "string",
+      "default": "goose",
+      "restartRequired": false
+    }
+  ]
+}

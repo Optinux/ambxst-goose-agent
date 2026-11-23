@@ -1,0 +1,38 @@
+name: Validate package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly canary: does the mod still compose onto the current Ambxst source?
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out Ambxst (full history so tested commits resolve)
+        uses: actions/checkout@v4
+        with:
+          repository: Axenide/Ambxst
+          path: ambxst
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Compile helper scripts
+        run: python -m py_compile payload/scripts/*.py tools/validate_package.py
+
+      - name: Validate manifest, settings, leaks and patches
+        run: python tools/validate_package.py --schemas ambxst/docs/mods --ambxst ambxst

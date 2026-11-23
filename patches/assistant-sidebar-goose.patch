@@ -1,0 +1,46 @@
+diff --git a/modules/sidebar/AssistantSidebar.qml b/modules/sidebar/AssistantSidebar.qml
+index 292f58c..95b807d 100644
+--- a/modules/sidebar/AssistantSidebar.qml
++++ b/modules/sidebar/AssistantSidebar.qml
+@@ -3,6 +3,7 @@ import QtQuick.Controls
+ import QtQuick.Layouts
+ import Quickshell.Widgets
+ import qs.modules.theme
++import qs.modules.widgets.dashboard.assistant
+ import qs.config
+ import qs.modules.components
+ import qs.modules.services
+@@ -644,6 +645,15 @@ Item {
+                                 Layout.fillWidth: true
+                                 height: 40
+ 
++                                Image {
++                                    visible: Ai.currentModel !== null && Ai.currentModel.provider === "goose"
++                                    source: GooseAgentService.iconPath
++                                    sourceSize: Qt.size(18, 18)
++                                    Layout.preferredWidth: 18
++                                    Layout.preferredHeight: 18
++                                    smooth: true
++                                }
++
+                                 Text {
+                                     text: Ai.currentModel ? Ai.currentModel.name : ""
+                                     color: Colors.overBackground
+@@ -659,6 +669,17 @@ Item {
+                                 visible: false
+                             }
+ 
++                            GooseActivityView {
++                                visible: Ai.currentModel !== null && Ai.currentModel.provider === "goose"
++                                Layout.fillWidth: true
++                                Layout.alignment: Qt.AlignTop
++                            }
++
++                            Item {
++                                visible: mainChatArea.isWelcome
++                                Layout.fillHeight: true
++                            }
++
+                             ListView {
+                                 id: chatView
+                                 visible: !mainChatArea.isWelcome
